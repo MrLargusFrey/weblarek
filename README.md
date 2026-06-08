@@ -98,3 +98,132 @@ Presenter - презентер содержит основную логику п
 `emit<T extends object>(event: string, data?: T): void` - инициализация события. При вызове события в метод передается название события и объект с данными, который будет использован как аргумент для вызова обработчика.  
 `trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void` - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие с передачей в него данных из второго параметра.
 
+## Данные
+
+### Интерфейсы данных
+
+В приложении используются следующие интерфейсы для описания данных:
+
+#### IProduct
+Описывает товар, получаемый с сервера или сохраняемый в каталоге.
+
+interface IProduct {
+  id: string;           // уникальный идентификатор
+  description: string;  // описание товара
+  image: string;        // ссылка на изображение
+  title: string;        // название товара
+  category: string;     // категория товара
+  price: number | null; // цена (null означает "без цены")
+}
+
+#### IBuyer
+Описывает данные покупателя для оформления заказа
+
+interface IBuyer {
+  payment: TPayment; // способ оплаты: 'card' или 'cash'
+  email: string; // почта пользователя
+  phone: string; // телефон пользователя
+  address: string; // адрес пользователя
+}
+
+#### TPayment
+Ограничение способа оплаты
+
+type TPayment = 'card' | 'cash'; // способ оплаты только карта или только cash
+
+## Модели данных
+
+### ProductsModel
+Зона ответственности:
+Управлениями товарами, которые можно купить в приложении.
+
+Конструктор класса не принимает параметров.
+
+Поля класса:
+`private _items: IProduct[] = [];`
+`private _preview: IProduct | null = null;`
+
+Методы класса:
+`setItems(items: IProduct[]): void` - сохранить массив товаров (полученный из параметра)
+`getItems(): IProduct[]` - получить массив всех товаров из модели
+`getItemById(id: string): IProduct | undefined` - получить один товар по его id
+`setPreview(product: IProduct): void` - сохранить товар для подробного отображения
+`getPreview(): IProduct | null` - получить товар для подробного отображения
+
+### ProductCart
+Зона ответственности:
+Управление товарами в корзине.
+
+Конструктор класса не принимает параметров.
+
+
+Поля класса:
+`private _cartItems: IProduct[] = [];`
+
+Методы класса:
+`getCartItems(): IProduct[]` - получить массив товаров в корзине
+`addItem(product: IProduct): void` - добавляет товар в корзину
+`removeItem(productId: string): void` - удаляет товар из корзины
+`getTotalPrice(): number` - получить общую стоимость (суммировать price)
+`clearCart(): void` - очистить корзину
+`getCount(): number` - получить количество товаров
+`hasItem(id: string): boolean` - проверить, есть ли товар в корзине
+
+### BuyerModel
+Зона ответственности:
+Хранит данные покупателя
+
+Конструктор класса не принимает параметров.
+
+
+Поля класса:
+`private _payment: TPayment | null = null;`
+`private _address: string = '';`
+`private _phone: string = '';`
+`private _email: string = '';`
+
+Методы класса:
+`setField(field: 'address' | 'phone' | 'email', value: string): void` - сохранить поле данных пользователя
+`setPayment(value: TPayment): void` - сохранить способ оплаты
+`getAll(): IBuyer` - получить все данные (с проверкой на null)
+`clear(): void` - очистить все поля
+`validate(): { isValid: boolean; errors: ValidationError[] }` - проверяет валидность данных
+
+## Слой коммуникации
+
+### WebLarekApi
+
+Зона ответственности:
+Взаимодействие с API сервера "Веб-ларёк" - получение товаров и отправка заказа.
+
+Конструктор класса:
+`constructor(api: IApi)` // принимает объект с методами get и post
+
+Поля класса:
+`private _api: IApi;`
+
+Методы класса:
+`getProducts(): Promise<{items: IProduct[]}>` получить список товаров с сервера (GET /product)
+`postOrder(order: IOrder): Promise<IOrderResult>` отправить данные заказа на сервер (POST /order)
+
+## Интерфейсы коммуникации
+
+### IOrder
+Тип для отправки заказа
+
+interface IOrder {
+  payment: TPayment;
+  email: string;
+  phone: string;
+  address: string;
+  total: number;
+  items: string[];
+}
+
+### IOrderResult
+Тип для ответа сервера после заказа
+
+interface IOrderResult {
+  id: string;
+  total: number;
+}
