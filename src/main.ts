@@ -1,9 +1,11 @@
-import { Api } from './components/base/api';
+import './scss/styles.scss';
+import { Api } from './components/base/Api';
 import { LarekApi } from './components/api/LarekApi';
-import { ProductsModel } from './components/models/ProductsModel';
-import { ProductCart } from './components/models/ProductCart';
-import { BuyerModel } from './components/models/BuyerModel';
+import { ProductsModel } from './components/Models/ProductsModel';
+import { ProductCart } from './components/Models/ProductCart';
+import { BuyerModel } from './components/Models/BuyerModel';
 import { API_URL } from './utils/constants';
+import { apiProducts } from './utils/data';
 
 const baseApi = new Api(API_URL);
 
@@ -13,56 +15,96 @@ const productsModel = new ProductsModel();
 const cartModel = new ProductCart();
 const buyerModel = new BuyerModel();
 
-console.log('Загружаю товары с сервера');
+console.log('Тестирование моделей на маковых данных');
 
-larekApi.getProducts()
-  .then(response => {
-    console.log('Товары получены:', response);
-    
-    productsModel.setItems(response.items);
-    
-    console.log('Каталог товаров в модели:', productsModel.getItems());
-    console.log('Количество товаров:', productsModel.getItems().length);
-  })
-  .catch(error => {
-    console.error('Ошибка при загрузке товаров:', error);
-  });
+console.log('ProductsModel');
 
-console.log('Тестирование корзины:');
+productsModel.setItems(apiProducts.items);
+console.log('setItems: массив товаров сохранён');
 
-const testProduct = {
-  id: 'test',
-  description: 'Тестовый товар',
-  image: '',
-  title: 'Тест',
-  category: 'test',
-  price: 100
-};
-cartModel.addItem(testProduct as any);
-console.log('Товаров в корзине:', cartModel.getCount());
-console.log('Общая стоимость:', cartModel.getTotalPrice());
+console.log('getItems:', productsModel.getItems());
+console.log('Количество товаров:', productsModel.getItems().length);
 
-console.log('Есть ли тестовый товар?', cartModel.hasItem('test'));
+const testId = apiProducts.items[0]?.id;
+const foundProduct = productsModel.getItemById(testId);
+console.log(`getItemById("${testId}"):`, foundProduct);
 
-cartModel.removeItem('test');
-console.log('После удаления, товаров в корзине:', cartModel.getCount());
+const notFoundProduct = productsModel.getItemById('non-existent-id');
+console.log('getItemById("non-existent-id"):', notFoundProduct);
 
-console.log('Тестирование данных покупателя:');
+productsModel.setPreview(apiProducts.items[0]);
+console.log('setPreview: установлен товар для просмотра');
+
+console.log('getPreview:', productsModel.getPreview());
+
+console.log('ProductCart');
+
+console.log('getCartItems (начальная):', cartModel.getCartItems());
+
+cartModel.addItem(apiProducts.items[0]);
+cartModel.addItem(apiProducts.items[1]);
+cartModel.addItem(apiProducts.items[0]); // попытка добавить дубликат
+console.log('addItem: добавлены товары (первый и второй)');
+
+console.log('getCartItems (после добавления):', cartModel.getCartItems());
+
+console.log('getCount:', cartModel.getCount());
+
+console.log('getTotalPrice:', cartModel.getTotalPrice());
+
+console.log(`hasItem("${apiProducts.items[0].id}"):`, cartModel.hasItem(apiProducts.items[0].id));
+console.log('hasItem("non-existent-id"):', cartModel.hasItem('non-existent-id'));
+
+cartModel.removeItem(apiProducts.items[0].id);
+console.log('removeItem: удалён первый товар');
+console.log('getCartItems после удаления:', cartModel.getCartItems());
+console.log('getCount после удаления:', cartModel.getCount());
+
+cartModel.clearCart();
+console.log('clearCart: корзина очищена');
+console.log('getCartItems после очистки:', cartModel.getCartItems());
+console.log('getCount после очистки:', cartModel.getCount());
+
+console.log('BuyerModel');
+
 buyerModel.setField('address', 'г. Москва, ул. Тестовая, д.1');
 buyerModel.setField('phone', '+7 999 123 45 67');
 buyerModel.setField('email', 'test@example.com');
-buyerModel.setPayment('card');
-console.log('Данные покупателя:', buyerModel.getAll());
+console.log('setField: address, phone, email заполнены');
 
-const validation = buyerModel.validate();
-console.log('Валидация (должна быть успешной):', validation);
+buyerModel.setPayment('card');
+console.log('setPayment: payment = "card"');
+
+console.log('getAll (полностью заполненный):', buyerModel.getAll());
+
+const validErrors = buyerModel.validate();
+console.log('validate (должен быть пустой объект):', validErrors);
+console.log('Валидно?', Object.keys(validErrors).length === 0);
 
 buyerModel.clear();
-console.log('После очистки:');
-console.log('Данные:', buyerModel.getAll());
+console.log('clear: данные очищены');
 
-const emptyValidation = buyerModel.validate();
-console.log('Валидация (должна показать ошибки):', emptyValidation);
+console.log('getAll после очистки:', buyerModel.getAll());
 
+const invalidErrors = buyerModel.validate();
+console.log('validate после очистки (ошибки):', invalidErrors);
+console.log('Ошибки в полях:', Object.keys(invalidErrors));
 
-console.log('Тестирование завершено. Если вы видите список товаров с сервера — всё работает!');
+console.log('Запрос к серверу');
+console.log('Загружаю товары с сервера...');
+
+larekApi.getProducts()
+  .then(response => {
+    console.log('Товары с сервера получены:', response);
+    
+    productsModel.setItems(response.items);
+    
+    console.log('Массив товаров сохранён в productsModel');
+    console.log('Количество товаров с сервера:', productsModel.getItems().length);
+    console.log('Первый товар:', productsModel.getItems()[0]?.title);
+  })
+  .catch(error => {
+    console.error('Ошибка при загрузке товаров с сервера:', error);
+  });
+
+console.log('Тестирование завершено');

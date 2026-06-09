@@ -1,56 +1,55 @@
-import { IBuyer, TPayment, ValidationError } from '../../types';
+import { IBuyer, TPayment, TBuyerErrors } from '../../types';
 
 export class BuyerModel {
-  private _payment: TPayment | null = null;
-  private _address: string = '';
-  private _phone: string = '';
-  private _email: string = '';
+  private payment: TPayment | null = null;
+  private address: string = '';
+  private phone: string = '';
+  private email: string = '';
 
-  setField(field: 'address' | 'phone' | 'email', value: string): void {
-    if (field === 'address') this._address = value;
-    if (field === 'phone') this._phone = value;
-    if (field === 'email') this._email = value;
+  setField(field: keyof IBuyer, value: string) {
+    if (field === 'payment') {
+      this[field] = value as TPayment;
+    } else {
+      this[field] = value;
+    }
   }
 
   setPayment(value: TPayment): void {
-    this._payment = value;
+    this.payment = value;
   }
 
   getAll(): IBuyer {
     return {
-      payment: this._payment as TPayment,
-      address: this._address,
-      phone: this._phone,
-      email: this._email,
+      payment: this.payment,
+      address: this.address,
+      phone: this.phone,
+      email: this.email,
     };
   }
 
   clear(): void {
-    this._payment = null;
-    this._address = '';
-    this._phone = '';
-    this._email = '';
+    this.payment = null;
+    this.address = '';
+    this.phone = '';
+    this.email = '';
   }
 
-  validate(): { isValid: boolean; errors: ValidationError[] } {
-    const errors: ValidationError[] = [];
+  validate(): TBuyerErrors {
+    const errors: TBuyerErrors = {};
 
-    if (this._payment === null) {
-      errors.push({ field: 'payment', message: 'Не выбран способ оплаты' });
+    if (this.payment === null) {
+      errors.payment = 'Не выбран способ оплаты';
     }
-    if (this._address.trim() === '') {
-      errors.push({ field: 'address', message: 'Укажите адрес доставки' });
+    if (this.address.trim() === '') {
+      errors.address = 'Укажите адрес доставки';
     }
-    if (this._phone.trim() === '') {
-      errors.push({ field: 'phone', message: 'Укажите телефон' });
+    if (this.phone.trim() === '') {
+      errors.phone = 'Укажите телефон';
     }
-    if (this._email.trim() === '') {
-      errors.push({ field: 'email', message: 'Укажите email' });
+    if (this.email.trim() === '') {
+      errors.email = 'Укажите email';
     }
 
-    return {
-      isValid: errors.length === 0,
-      errors,
-    };
+    return errors;
   }
 }
