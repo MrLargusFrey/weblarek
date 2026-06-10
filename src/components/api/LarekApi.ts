@@ -13,6 +13,7 @@ export class LarekApi {
   }
 
   async postOrder(order: IOrder): Promise<IOrderResult> {
-    return this.api.post('/order', order) as Promise<IOrderResult>;
-  }
+  return this.api.post<IOrderResult>('/order', order);
+}
+
 }

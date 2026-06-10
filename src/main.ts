@@ -72,7 +72,7 @@ buyerModel.setField('phone', '+7 999 123 45 67');
 buyerModel.setField('email', 'test@example.com');
 console.log('setField: address, phone, email заполнены');
 
-buyerModel.setPayment('card');
+buyerModel.setField('payment', 'card');
 console.log('setPayment: payment = "card"');
 
 console.log('getAll (полностью заполненный):', buyerModel.getAll());

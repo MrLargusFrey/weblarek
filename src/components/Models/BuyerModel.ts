@@ -37,16 +37,16 @@ export class BuyerModel {
   validate(): TBuyerErrors {
     const errors: TBuyerErrors = {};
 
-    if (this.payment === null) {
+    if (!this.payment) {
       errors.payment = 'Не выбран способ оплаты';
     }
-    if (this.address.trim() === '') {
+    if (!this.address.trim()) {
       errors.address = 'Укажите адрес доставки';
     }
-    if (this.phone.trim() === '') {
+    if (!this.phone.trim()) {
       errors.phone = 'Укажите телефон';
     }
-    if (this.email.trim() === '') {
+    if (!this.email.trim()) {
       errors.email = 'Укажите email';
     }
 
