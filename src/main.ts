@@ -105,6 +105,9 @@ events.on('card:select', (data: { id: string }) => {
 });
 
 events.on('preview:changed', (product: IProduct) => {
+  const newContainer = previewTemplate.content.cloneNode(true) as HTMLElement;
+  previewCard.setContainer(newContainer);
+
   previewCard.title = product.title;
   previewCard.price = product.price;
   previewCard.category = product.category;
