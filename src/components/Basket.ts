@@ -1,0 +1,40 @@
+import { Component } from './base/Component';
+import { IProduct } from '../types';
+import { EventEmitter } from './base/Events';
+
+export class Basket extends Component<HTMLElement> {
+  private events: EventEmitter;
+  private list: HTMLElement;
+  private totalElement: HTMLElement;
+  private button: HTMLButtonElement;
+
+  constructor(container: HTMLElement, events: EventEmitter) {
+    super(container);
+    this.events = events;
+    this.list = container.querySelector('.basket__list') as HTMLElement;
+    this.totalElement = container.querySelector('.basket__price') as HTMLElement;
+    this.button = container.querySelector('.basket__button') as HTMLButtonElement;
+
+    this.button.addEventListener('click', (): void => {
+      this.events.emit('basket:order');
+    });
+  }
+
+  set items(value: IProduct[]) {
+    if (value.length === 0) {
+      this.list.innerHTML = '<p class="basket__empty">Корзина пуста</p>';
+      this.button.disabled = true;
+      return;
+    }
+    this.button.disabled = false;
+    this.list.innerHTML = '';
+  }
+
+  set total(value: number) {
+    this.totalElement.textContent = `${value} синапсов`;
+  }
+
+  set isDisabled(value: boolean) {
+    this.button.disabled = value;
+  }
+}
