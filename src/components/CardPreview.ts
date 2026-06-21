@@ -1,39 +1,45 @@
 import { Card } from './Card';
-import { IProduct } from '../types';
-import { EventEmitter } from './base/Events';
 
 export class CardPreview extends Card {
-  private events: EventEmitter;
-  private button: HTMLButtonElement;
+  private categoryElement: HTMLElement;
+  private imageElement: HTMLImageElement;
   private descriptionElement: HTMLElement;
-  private productId: string = '';
+  private button: HTMLButtonElement;
 
-  constructor(container: HTMLElement, events: EventEmitter) {
+  constructor(container: HTMLElement, onToggle: () => void) {
     super(container);
-    this.events = events;
-    this.button = container.querySelector('.card__button') as HTMLButtonElement;
+    this.categoryElement = container.querySelector('.card__category') as HTMLElement;
+    this.imageElement = container.querySelector('.card__image') as HTMLImageElement;
     this.descriptionElement = container.querySelector('.card__text') as HTMLElement;
+    this.button = container.querySelector('.card__button') as HTMLButtonElement;
 
-    this.button.addEventListener('click', (): void => {
-      const isInCart = this.button.textContent === 'Удалить из корзины';
-      this.events.emit(isInCart ? 'preview:remove' : 'preview:add', { id: this.productId });
-    });
+    this.button.addEventListener('click', onToggle);
   }
 
-  set data(value: IProduct) {
-    super.data = value;
-    this.productId = value.id;
-    this.descriptionElement.textContent = value.description;
+  set category(value: string) {
+    this.categoryElement.textContent = value;
+    const categoryMap: Record<string, string> = {
+      'софт-скил': 'card__category_soft',
+      'хард-скил': 'card__category_hard',
+      'другое': 'card__category_other',
+    };
+    const className = categoryMap[value] || 'card__category_other';
+    this.categoryElement.className = `card__category ${className}`;
   }
 
-  set inCart(value: boolean) {
-    if (value) {
-      this.button.textContent = 'Удалить из корзины';
-      this.button.disabled = false;
-    } else {
-      const isUnavailable = this.priceElement.textContent === 'Недоступно';
-      this.button.textContent = isUnavailable ? 'Недоступно' : 'Купить';
-      this.button.disabled = isUnavailable;
-    }
+  set image(value: string) {
+    this.setImage(this.imageElement, value);
+  }
+
+  set description(value: string) {
+    this.descriptionElement.textContent = value;
+  }
+
+  set buttonText(value: string) {
+    this.button.textContent = value;
+  }
+
+  set buttonDisabled(value: boolean) {
+    this.button.disabled = value;
   }
 }

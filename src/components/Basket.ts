@@ -1,5 +1,4 @@
 import { Component } from './base/Component';
-import { IProduct } from '../types';
 import { EventEmitter } from './base/Events';
 
 export class Basket extends Component<HTMLElement> {
@@ -20,14 +19,18 @@ export class Basket extends Component<HTMLElement> {
     });
   }
 
-  set items(value: IProduct[]) {
-    if (value.length === 0) {
-      this.list.innerHTML = '<p class="basket__empty">Корзина пуста</p>';
+  set items(cardElements: HTMLElement[]) {
+    this.list.innerHTML = '';
+    if (cardElements.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'basket__empty';
+      empty.textContent = 'Корзина пуста';
+      this.list.appendChild(empty);
       this.button.disabled = true;
       return;
     }
     this.button.disabled = false;
-    this.list.innerHTML = '';
+    cardElements.forEach(el => this.list.appendChild(el));
   }
 
   set total(value: number) {

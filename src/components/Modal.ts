@@ -7,6 +7,12 @@ export class Modal extends Component<HTMLElement> {
   private content: HTMLElement;
   private events: EventEmitter;
 
+  private handleEscape = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') {
+      this.close();
+    }
+  };
+
   constructor(container: HTMLElement, events: EventEmitter) {
     super(container);
     this.events = events;
@@ -23,34 +29,20 @@ export class Modal extends Component<HTMLElement> {
         this.close();
       }
     });
-
-    document.addEventListener('keydown', (e: KeyboardEvent): void => {
-      if (e.key === 'Escape' && this.isOpen) {
-        this.close();
-      }
-    });
-  }
-
-  get isOpen(): boolean {
-    return this.modal.classList.contains('modal_active');
   }
 
   open(content: HTMLElement): void {
     this.content.innerHTML = '';
     this.content.appendChild(content);
     this.modal.classList.add('modal_active');
-    document.body.classList.add('locked');
+    document.addEventListener('keydown', this.handleEscape);
     this.events.emit('modal:open');
   }
 
   close(): void {
     this.modal.classList.remove('modal_active');
-    document.body.classList.remove('locked');
     this.content.innerHTML = '';
+    document.removeEventListener('keydown', this.handleEscape);
     this.events.emit('modal:close');
-  }
-
-  render(): HTMLElement {
-    return this.modal;
   }
 }

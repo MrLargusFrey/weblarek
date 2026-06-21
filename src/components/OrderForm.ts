@@ -1,36 +1,30 @@
 import { Form } from './Form';
 import { EventEmitter } from './base/Events';
+import { TPayment } from '../types';
 
 export class OrderForm extends Form<HTMLElement> {
   private paymentButtons: HTMLButtonElement[];
   private addressInput: HTMLInputElement;
 
   constructor(container: HTMLElement, events: EventEmitter) {
-    super(container, events, 'order');
+    super(container, events);
     this.paymentButtons = Array.from(container.querySelectorAll('.button_alt'));
     this.addressInput = container.querySelector('input[name="address"]') as HTMLInputElement;
 
     this.paymentButtons.forEach(button => {
       button.addEventListener('click', (): void => {
-        this.paymentButtons.forEach(b => b.classList.remove('button_alt-active'));
-        button.classList.add('button_alt-active');
-        this.events.emit('order:payment', { payment: button.name });
+        this.events.emit('order:payment', { payment: button.name as TPayment });
       });
     });
   }
 
-  get payment(): string | null {
-    const active = this.paymentButtons.find(b => b.classList.contains('button_alt-active'));
-    return active ? active.name : null;
+  set payment(value: TPayment | null) {
+    this.paymentButtons.forEach(btn => {
+      btn.classList.toggle('button_alt-active', btn.name === value);
+    });
   }
 
-  get address(): string {
-    return this.addressInput.value;
-  }
-
-  clear(): void {
-    super.clear();
-    this.paymentButtons.forEach(b => b.classList.remove('button_alt-active'));
-    this.addressInput.value = '';
+  set address(value: string) {
+    this.addressInput.value = value;
   }
 }

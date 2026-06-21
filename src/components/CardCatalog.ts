@@ -1,22 +1,29 @@
 import { Card } from './Card';
-import { IProduct } from '../types';
-import { EventEmitter } from './base/Events';
 
 export class CardCatalog extends Card {
-  private events: EventEmitter;
-  private productId: string = '';
+  private categoryElement: HTMLElement;
+  private imageElement: HTMLImageElement;
 
-  constructor(container: HTMLElement, events: EventEmitter) {
+  constructor(container: HTMLElement, onClick: () => void) {
     super(container);
-    this.events = events;
+    this.categoryElement = container.querySelector('.card__category') as HTMLElement;
+    this.imageElement = container.querySelector('.card__image') as HTMLImageElement;
 
-    container.addEventListener('click', (): void => {
-      this.events.emit('card:select', { id: this.productId });
-    });
+    container.addEventListener('click', onClick);
   }
 
-  set data(value: IProduct) {
-    super.data = value;
-    this.productId = value.id;
+  set category(value: string) {
+    this.categoryElement.textContent = value;
+    const categoryMap: Record<string, string> = {
+      'софт-скил': 'card__category_soft',
+      'хард-скил': 'card__category_hard',
+      'другое': 'card__category_other',
+    };
+    const className = categoryMap[value] || 'card__category_other';
+    this.categoryElement.className = `card__category ${className}`;
+  }
+
+  set image(value: string) {
+    this.setImage(this.imageElement, value);
   }
 }

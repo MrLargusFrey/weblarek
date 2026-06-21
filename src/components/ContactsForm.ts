@@ -6,22 +6,16 @@ export class ContactsForm extends Form<HTMLElement> {
   private phoneInput: HTMLInputElement;
 
   constructor(container: HTMLElement, events: EventEmitter) {
-    super(container, events, 'contacts');
+    super(container, events);
     this.emailInput = container.querySelector('input[name="email"]') as HTMLInputElement;
     this.phoneInput = container.querySelector('input[name="phone"]') as HTMLInputElement;
   }
 
-  get email(): string {
-    return this.emailInput.value;
+  set email(value: string) {
+    this.emailInput.value = value;
   }
 
-  get phone(): string {
-    return this.phoneInput.value;
-  }
-
-  clear(): void {
-    super.clear();
-    this.emailInput.value = '';
-    this.phoneInput.value = '';
+  set phone(value: string) {
+    this.phoneInput.value = value;
   }
 }

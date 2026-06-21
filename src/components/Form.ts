@@ -7,12 +7,10 @@ export abstract class Form<T> extends Component<T> {
   protected errorsElement: HTMLElement;
   protected inputs: HTMLInputElement[];
   protected events: EventEmitter;
-  protected formName: string;
 
-  constructor(container: HTMLElement, events: EventEmitter, formName: string) {
+  constructor(container: HTMLElement, events: EventEmitter) {
     super(container);
     this.events = events;
-    this.formName = formName;
     this.formElement = container as HTMLFormElement;
     this.submitButton = container.querySelector('.button') as HTMLButtonElement;
     this.errorsElement = container.querySelector('.form__errors') as HTMLElement;
@@ -20,22 +18,17 @@ export abstract class Form<T> extends Component<T> {
 
     this.formElement.addEventListener('submit', (e: Event): void => {
       e.preventDefault();
-      this.events.emit(`${this.formName}:submit`);
+      this.events.emit(`${this.formElement.name}:submit`);
     });
 
     this.inputs.forEach(input => {
       input.addEventListener('input', (): void => {
-        this.events.emit(`${this.formName}:input`, this.formData);
+        this.events.emit(`${this.formElement.name}:input`, {
+          field: input.name,
+          value: input.value
+        });
       });
     });
-  }
-
-  get formData(): Record<string, string> {
-    const data: Record<string, string> = {};
-    this.inputs.forEach(input => {
-      data[input.name] = input.value;
-    });
-    return data;
   }
 
   set valid(value: boolean) {
@@ -44,10 +37,5 @@ export abstract class Form<T> extends Component<T> {
 
   set errors(value: string) {
     this.errorsElement.textContent = value;
-  }
-
-  clear(): void {
-    this.inputs.forEach(input => input.value = '');
-    this.errors = '';
   }
 }
