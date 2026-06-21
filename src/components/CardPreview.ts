@@ -6,12 +6,10 @@ export class CardPreview extends Card {
   private descriptionElement: HTMLElement;
   private button: HTMLButtonElement;
   private onToggle: () => void;
-  private currentContainer: HTMLElement; // ← новое поле
 
   constructor(container: HTMLElement, onToggle: () => void) {
     super(container);
     this.onToggle = onToggle;
-    this.currentContainer = container;
     this.categoryElement = container.querySelector('.card__category') as HTMLElement;
     this.imageElement = container.querySelector('.card__image') as HTMLImageElement;
     this.descriptionElement = container.querySelector('.card__text') as HTMLElement;
@@ -21,7 +19,7 @@ export class CardPreview extends Card {
   }
 
   setContainer(container: HTMLElement): void {
-    this.currentContainer = container;
+    this.container = container;
     this.categoryElement = container.querySelector('.card__category') as HTMLElement;
     this.imageElement = container.querySelector('.card__image') as HTMLImageElement;
     this.descriptionElement = container.querySelector('.card__text') as HTMLElement;
@@ -29,10 +27,6 @@ export class CardPreview extends Card {
 
     this.button.removeEventListener('click', this.onToggle);
     this.button.addEventListener('click', this.onToggle);
-  }
-
-  render(): HTMLElement {
-    return this.currentContainer;
   }
 
   set category(value: string) {
