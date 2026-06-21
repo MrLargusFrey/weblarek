@@ -18,13 +18,5 @@ export class CardCatalog extends Card {
   set data(value: IProduct) {
     super.data = value;
     this.productId = value.id;
-    
-    if (value.price === null) {
-      this.priceElement.textContent = 'Недоступно';
-      this.container.classList.add('card_unavailable');
-    } else {
-      this.priceElement.textContent = `${value.price} синапсов`;
-      this.container.classList.remove('card_unavailable');
-    }
   }
 }

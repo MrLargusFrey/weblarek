@@ -19,7 +19,6 @@ import { Success } from './components/Success';
 
 import { IProduct, IOrder } from './types';
 
-
 const events = new EventEmitter();
 
 const api = new Api(API_URL);
@@ -57,7 +56,7 @@ larekApi.getProducts()
   });
 
 events.on('products:changed', (data: { items: IProduct[] }) => {
- if (data && data.items) {
+  if (data && data.items) {
     renderCatalog(data.items);
   } else {
     console.error('Ошибка: данные каталога не получены', data);
@@ -72,9 +71,21 @@ function renderCatalog(products: IProduct[]) {
   
   gallery.innerHTML = '';
   
-  products.forEach(product => {
+  products.forEach((product) => {
     const cardTemplate = document.querySelector('#card-catalog') as HTMLTemplateElement;
-    const cardElement = cardTemplate.content.cloneNode(true) as HTMLElement;
+    if (!cardTemplate) {
+      console.error('Шаблон #card-catalog не найден');
+      return;
+    }
+    
+    const fragment = cardTemplate.content.cloneNode(true) as DocumentFragment;
+    const cardElement = fragment.firstElementChild as HTMLElement;
+    
+    if (!cardElement) {
+      console.error('Не удалось получить элемент из фрагмента');
+      return;
+    }
+    
     const card = new CardCatalog(cardElement, events);
     card.data = product;
     gallery.appendChild(card.render());
@@ -85,6 +96,8 @@ events.on('card:select', (data: { id: string }) => {
   const product = productsModel.getItemById(data.id);
   if (product) {
     productsModel.setPreview(product);
+  } else {
+    console.error('Товар не найден:', data.id);
   }
 });
 
@@ -119,7 +132,6 @@ events.on('cart:changed', (data: { items: IProduct[] }) => {
   updateBasketCounter(items.length);
   updateBasket(items);
 });
-
 
 function updateBasketCounter(count: number) {
   basketCounter.textContent = String(count);
@@ -267,4 +279,4 @@ events.on('success:close', () => {
   modal.close();
 });
 
-console.log('🚀 Веб-ларёк запущен!');
+console.log('Веб-ларёк запущен!');

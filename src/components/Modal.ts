@@ -14,7 +14,6 @@ export class Modal extends Component<HTMLElement> {
     this.closeButton = container.querySelector('.modal__close') as HTMLElement;
     this.content = container.querySelector('.modal__content') as HTMLElement;
 
-    // Все обработчики — стрелочные функции
     this.closeButton.addEventListener('click', (): void => {
       this.close();
     });

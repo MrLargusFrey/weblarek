@@ -40,6 +40,9 @@ export abstract class Card extends Component<IProduct> {
   }
 
   set image(value: string) {
+    if (value && !value.startsWith('http')) {
+      value = `https://larek-api.nomoreparties.co${value}`;
+    }
     this.setImage(this.imageElement, value);
   }
 }
