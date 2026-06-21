@@ -57,6 +57,32 @@ const previewCard = new CardPreview(
   () => events.emit('preview:toggle')
 );
 
+function createCatalogCard(product: IProduct): HTMLElement {
+  const cardTemplate = document.querySelector('#card-catalog') as HTMLTemplateElement;
+  const fragment = cardTemplate.content.cloneNode(true) as DocumentFragment;
+  const cardElement = fragment.firstElementChild as HTMLElement;
+  const card = new CardCatalog(cardElement, () => {
+    events.emit('card:select', { id: product.id });
+  });
+  card.title = product.title;
+  card.price = product.price;
+  card.category = product.category;
+  card.image = product.image;
+  return card.render();
+}
+
+function createBasketCard(product: IProduct, index: number): HTMLElement {
+  const cardTemplate = document.querySelector('#card-basket') as HTMLTemplateElement;
+  const cardElement = cardTemplate.content.cloneNode(true) as HTMLElement;
+  const card = new CardBasket(cardElement, () => {
+    events.emit('basket:remove', { id: product.id });
+  });
+  card.title = product.title;
+  card.price = product.price;
+  card.index = index;
+  return card.render();
+}
+
 larekApi.getProducts()
   .then(response => {
     productsModel.setItems(response.items);
@@ -67,21 +93,7 @@ larekApi.getProducts()
 
 events.on('products:changed', (data: { items: IProduct[] }) => {
   if (data && data.items) {
-    const cardElements: HTMLElement[] = [];
-    data.items.forEach((product) => {
-      const cardTemplate = document.querySelector('#card-catalog') as HTMLTemplateElement;
-      const fragment = cardTemplate.content.cloneNode(true) as DocumentFragment;
-      const cardElement = fragment.firstElementChild as HTMLElement;
-      const card = new CardCatalog(cardElement, () => {
-        events.emit('card:select', { id: product.id });
-      });
-      card.title = product.title;
-      card.price = product.price;
-      card.category = product.category;
-      card.image = product.image;
-      cardElements.push(card.render());
-    });
-    catalog.items = cardElements;
+    catalog.items = data.items.map((product) => createCatalogCard(product));
   }
 });
 
@@ -127,19 +139,7 @@ events.on('basket:remove', (data: { id: string }) => {
 
 events.on('basket:open', () => {
   const items = cartModel.getCartItems();
-  const cardElements: HTMLElement[] = [];
-
-  items.forEach((product, index) => {
-    const cardTemplate = document.querySelector('#card-basket') as HTMLTemplateElement;
-    const cardElement = cardTemplate.content.cloneNode(true) as HTMLElement;
-    const card = new CardBasket(cardElement, () => {
-      events.emit('basket:remove', { id: product.id });
-    });
-    card.title = product.title;
-    card.price = product.price;
-    card.index = index;
-    cardElements.push(card.render());
-  });
+  const cardElements = items.map((product, index) => createBasketCard(product, index));
 
   basket.items = cardElements;
   basket.total = cartModel.getTotalPrice();
@@ -217,7 +217,7 @@ events.on('contacts:submit', () => {
     phone: buyer.phone,
     address: buyer.address,
     total: cartModel.getTotalPrice(),
-    items: cartModel.getCartItems().map(item => item.id)
+    items: cartModel.getCartItems().map(item => item.id),
   };
 
   larekApi.postOrder(order)
@@ -230,6 +230,7 @@ events.on('contacts:submit', () => {
     .catch(error => {
       console.error('Ошибка оформления заказа:', error);
       contactsForm.errors = 'Ошибка при оформлении заказа. Попробуйте снова.';
+      contactsForm.valid = true;
     });
 });
 

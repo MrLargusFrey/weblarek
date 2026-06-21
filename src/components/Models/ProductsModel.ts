@@ -1,5 +1,6 @@
 import { IProduct } from '../../types';
 import { EventEmitter } from '../base/Events';
+import { API_URL } from '../../utils/constants';
 
 export class ProductsModel {
   private items: IProduct[] = [];
@@ -11,8 +12,10 @@ export class ProductsModel {
   }
 
   setItems(items: IProduct[]): void {
-    this.items = items;
-    // Передаём объект с полем items
+    this.items = items.map(item => ({
+      ...item,
+      image: item.image ? `${API_URL}${item.image}` : item.image,
+    }));
     this.events.emit('products:changed', { items: this.items });
   }
 

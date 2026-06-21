@@ -25,7 +25,7 @@ export abstract class Form<T> extends Component<T> {
       input.addEventListener('input', (): void => {
         this.events.emit(`${this.formElement.name}:input`, {
           field: input.name,
-          value: input.value
+          value: input.value,
         });
       });
     });
