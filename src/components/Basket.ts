@@ -22,10 +22,7 @@ export class Basket extends Component<HTMLElement> {
   set items(cardElements: HTMLElement[]) {
     this.list.innerHTML = '';
     if (cardElements.length === 0) {
-      const empty = document.createElement('p');
-      empty.className = 'basket__empty';
-      empty.textContent = 'Корзина пуста';
-      this.list.appendChild(empty);
+      this.list.innerHTML = '<p class="basket__empty">Корзина пуста</p>';
       this.button.disabled = true;
       return;
     }

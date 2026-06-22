@@ -12,7 +12,7 @@ export abstract class Form<T> extends Component<T> {
     super(container);
     this.events = events;
     this.formElement = container as HTMLFormElement;
-    this.submitButton = container.querySelector('.button') as HTMLButtonElement;
+    this.submitButton = container.querySelector('.order__button') as HTMLButtonElement;
     this.errorsElement = container.querySelector('.form__errors') as HTMLElement;
     this.inputs = Array.from(container.querySelectorAll('.form__input'));
 

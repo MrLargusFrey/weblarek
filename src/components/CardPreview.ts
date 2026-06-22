@@ -18,17 +18,6 @@ export class CardPreview extends Card {
     this.button.addEventListener('click', this.onToggle);
   }
 
-  setContainer(container: HTMLElement): void {
-    this.container = container;
-    this.categoryElement = container.querySelector('.card__category') as HTMLElement;
-    this.imageElement = container.querySelector('.card__image') as HTMLImageElement;
-    this.descriptionElement = container.querySelector('.card__text') as HTMLElement;
-    this.button = container.querySelector('.card__button') as HTMLButtonElement;
-
-    this.button.removeEventListener('click', this.onToggle);
-    this.button.addEventListener('click', this.onToggle);
-  }
-
   set category(value: string) {
     this.categoryElement.textContent = value;
     const categoryMap: Record<string, string> = {

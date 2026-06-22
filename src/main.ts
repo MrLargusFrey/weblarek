@@ -67,7 +67,7 @@ function createCatalogCard(product: IProduct): HTMLElement {
   card.title = product.title;
   card.price = product.price;
   card.category = product.category;
-  card.image = product.image;
+  card.image = `${API_URL}${product.image}`;
   return card.render();
 }
 
@@ -81,6 +81,14 @@ function createBasketCard(product: IProduct, index: number): HTMLElement {
   card.price = product.price;
   card.index = index;
   return card.render();
+}
+
+function updateBasketView(): void {
+  const items = cartModel.getCartItems();
+  const cardElements = items.map((product, index) => createBasketCard(product, index));
+  basket.items = cardElements;
+  basket.total = cartModel.getTotalPrice();
+  basket.isDisabled = items.length === 0;
 }
 
 larekApi.getProducts()
@@ -105,13 +113,10 @@ events.on('card:select', (data: { id: string }) => {
 });
 
 events.on('preview:changed', (product: IProduct) => {
-  const newContainer = previewTemplate.content.cloneNode(true) as HTMLElement;
-  previewCard.setContainer(newContainer);
-
   previewCard.title = product.title;
   previewCard.price = product.price;
   previewCard.category = product.category;
-  previewCard.image = product.image;
+  previewCard.image = `${API_URL}${product.image}`;
   previewCard.description = product.description;
 
   const inCart = cartModel.hasItem(product.id);
@@ -127,13 +132,10 @@ events.on('preview:toggle', () => {
 
   if (cartModel.hasItem(product.id)) {
     cartModel.removeItem(product.id);
-    modal.close();
-  } else {
-    if (product.price !== null) {
-      cartModel.addItem(product);
-      modal.close();
-    }
+  } else if (product.price !== null) {
+    cartModel.addItem(product);
   }
+  modal.close();
 });
 
 events.on('basket:remove', (data: { id: string }) => {
@@ -141,18 +143,13 @@ events.on('basket:remove', (data: { id: string }) => {
 });
 
 events.on('basket:open', () => {
-  const items = cartModel.getCartItems();
-  const cardElements = items.map((product, index) => createBasketCard(product, index));
-
-  basket.items = cardElements;
-  basket.total = cartModel.getTotalPrice();
-  basket.isDisabled = items.length === 0;
+  updateBasketView();
   modal.open(basket.render());
 });
 
-events.on('cart:changed', (data: { items: IProduct[] }) => {
-  const items = data && data.items ? data.items : [];
-  header.counter = items.length;
+events.on('cart:changed', () => {
+  header.counter = cartModel.getCount();
+  updateBasketView();
 });
 
 events.on('basket:order', () => {

@@ -20,8 +20,14 @@ export class OrderForm extends Form<HTMLElement> {
 
   set payment(value: TPayment | null) {
     this.paymentButtons.forEach(btn => {
-      btn.classList.toggle('button_alt-active', btn.name === value);
+      btn.classList.remove('button_alt-active');
     });
+    if (value) {
+      const activeButton = this.paymentButtons.find(btn => btn.name === value);
+      if (activeButton) {
+        activeButton.classList.add('button_alt-active');
+      }
+    }
   }
 
   set address(value: string) {
