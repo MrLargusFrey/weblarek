@@ -1,5 +1,6 @@
 import { Component } from './base/Component';
 import { EventEmitter } from './base/Events';
+import { ensureElement } from '../utils/utils'
 
 export abstract class Form<T> extends Component<T> {
   protected formElement: HTMLFormElement;
@@ -12,7 +13,10 @@ export abstract class Form<T> extends Component<T> {
     super(container);
     this.events = events;
     this.formElement = container as HTMLFormElement;
-    this.submitButton = container.querySelector('.order__button') as HTMLButtonElement;
+    this.submitButton = ensureElement<HTMLButtonElement>(
+      'button[type=submit]',
+      this.container
+    );
     this.errorsElement = container.querySelector('.form__errors') as HTMLElement;
     this.inputs = Array.from(container.querySelectorAll('.form__input'));
 

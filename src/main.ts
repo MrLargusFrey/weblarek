@@ -6,7 +6,7 @@ import { EventEmitter } from './components/base/Events';
 import { ProductsModel } from './components/Models/ProductsModel';
 import { ProductCart } from './components/Models/ProductCart';
 import { BuyerModel } from './components/Models/BuyerModel';
-import { API_URL } from './utils/constants';
+import { API_URL, CDN_URL } from './utils/constants';
 
 import { Modal } from './components/Modal';
 import { Catalog } from './components/Catalog';
@@ -53,7 +53,7 @@ const success = new Success(successTemplate.content.querySelector('.order-succes
 
 const previewTemplate = document.querySelector('#card-preview') as HTMLTemplateElement;
 const previewCard = new CardPreview(
-  previewTemplate.content.cloneNode(true) as HTMLElement,
+  previewTemplate.content.querySelector('.card_full') as HTMLElement,
   () => events.emit('preview:toggle')
 );
 
@@ -67,7 +67,7 @@ function createCatalogCard(product: IProduct): HTMLElement {
   card.title = product.title;
   card.price = product.price;
   card.category = product.category;
-  card.image = `${API_URL}${product.image}`;
+  card.image = product.image;
   return card.render();
 }
 
@@ -92,18 +92,24 @@ function updateBasketView(): void {
 }
 
 larekApi.getProducts()
-  .then(response => {
-    productsModel.setItems(response.items);
+  .then((data) => ({
+    ...data,
+    items: data.items.map((item) => ({
+      ...item,
+      image: CDN_URL + item.image,
+    })),
+  }))
+  .then((data) => {
+    productsModel.setItems(data.items);
   })
-  .catch(error => {
-    console.error('Ошибка загрузки товаров:', error);
-  });
+  .catch((err) => console.error('Ошибка загрузки товаров:', err));
 
 events.on('products:changed', (data: { items: IProduct[] }) => {
   if (data && data.items) {
     catalog.items = data.items.map((product) => createCatalogCard(product));
   }
 });
+
 
 events.on('card:select', (data: { id: string }) => {
   const product = productsModel.getItemById(data.id);
@@ -116,7 +122,7 @@ events.on('preview:changed', (product: IProduct) => {
   previewCard.title = product.title;
   previewCard.price = product.price;
   previewCard.category = product.category;
-  previewCard.image = `${API_URL}${product.image}`;
+  previewCard.image = product.image;
   previewCard.description = product.description;
 
   const inCart = cartModel.hasItem(product.id);
